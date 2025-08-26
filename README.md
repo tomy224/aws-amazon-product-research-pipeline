@@ -2,15 +2,29 @@
 AWS Step Functions と Lambda を活用した、Amazon商品リサーチの完全自動化システムです。  
 AI駆動開発により効率的に構築し、サーバーレス構成で大規模なデータ処理を実現しています。
 
+## 🌐 Live Demo
+**実際のStep Functionsワークフロー実行結果とデータ処理パフォーマンスを確認できます**
+
 ## 📋 プロジェクト概要
 卸サイトの商品情報を起点として、Amazon販売の利益可能性を数値で判定する自動分析システムです。  
 複数のAPIを連携させ、商品の価格履歴・競合状況・販売予測を総合的に評価します。
 
 ## 🏗️ システム構成
+
+### AWSサーバーレスアーキテクチャ
+![AWS Architecture - Amazon Product Research Pipeline](docs/images/aws_amazon_research_flow.png)
+📖 **[高解像度版（SVG）はこちら](docs/images/aws_amazon_research_flow.svg)**
+
+### データフロー概要
 ```
-[卸サイト] → [スクレイピング] → [Step Functions] → [並列Lambda処理] → [データ統合] → [利益分析結果]
-    ↓              ↓                    ↓                ↓               ↓
-[商品一覧]      [JAN抽出]        [バッチ分割]    [API並列呼び出し]   [CSV出力]
+[Input S3] → [Step Functions] → [Output S3] → [Google Spreadsheet]
+     ↓              ↓                ↓              ↓
+[商品データ]    [並列Lambda処理]    [統合結果]    [分析レポート]
+              ├─ スクレイピング
+              ├─ SP-API連携  
+              ├─ Keepa分析
+              ├─ 価格調査
+              └─ データ統合
 ```
 
 ## 💻 使用技術・サービス

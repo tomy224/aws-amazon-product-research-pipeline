@@ -1,0 +1,186 @@
+# sp api設定
+sp_api:
+  request_delay: 0.125
+  output:
+    input_file: "netsea_scraping.csv"
+    output_file: "sp_api_output.csv"
+
+filters:
+  ranking:
+    min: 1
+    max: 100000
+  price:  # カート価格の上限下限
+    min: 
+    max: 
+  sellers:
+    total:
+      min: 2
+      max: 
+    fba:
+      min: 
+      max: 5
+  amazon_seller: false  # Amazonの出品がない場合のみ
+  dimensions:
+    max:   # cm
+
+
+# Keepa api設定
+keepa_api:
+  request_delay: 0.2  # APIリクエスト間の待機時間
+  domain: "JP"       # 対象マーケットプレイス
+  stats_days: 180    # 統計情報の取得日数
+  output:
+    input_file: "sp_api_output_filtered.csv"
+    output_file: "keepa_output.csv"
+
+# integrationコード設定
+data_integration:
+  output:
+    sp_api_input: "sp_api_output_filtered.csv"
+    keepa_input: "keepa_output.csv"
+    output_file: "integrated_data.csv"
+  sources:
+    - type: "netsea"
+      prefix: "ネッシー_"  # 「卸_」から変更
+      files:
+        - "netsea_scraping.csv"
+      key_column: "JANコード"
+    - type: "sudeli"
+      prefix: "スーデリ_"  # 「卸_」から変更
+      files:
+        - "sudeli_scraping.csv"
+      key_column: "JANコード"
+    - type: "yahoo"  # ヤフーショッピング情報
+      files:
+        - "yahoo_shopping_items.csv"
+      key_column: "JAN"
+      prefix: "ヤフー_"
+    - type: "yoriyasu"  # ヨリヤス価格比較情報
+      prefix: "ヨリヤス_"
+      files:
+        - "yoriyasu_prices.csv"
+      key_column: "JANコード"
+
+
+# 計算処理の設定
+calculator:
+  output:
+    input_file: "integrated_data.csv"  # 入力ファイル (data_integrationの出力結果)
+    output_file: "calculated_data.csv" # 出力ファイル
+  # JSONデータファイルのパス (オプション、今はコメントアウト)
+  # json_file: "data/reference_data.json"
+
+
+# 価格検索の設定(ヤフー楽天価格検索)
+price_search:
+  output:
+    input_file: "jan_list.csv"        # 入力JAN一覧ファイル
+    output_file: "yahoo_rakuten_price_output.csv"  # 出力結果ファイル
+
+
+# 価格検索設定
+price_finder:
+  yoriyasu:
+    output:
+      input_file: "jan_list.csv"  # JANコードリストのCSVファイル
+      output_file: "yoriyasu_prices.csv"  # 出力ファイル
+      log_dir: "logs"
+    # 必要に応じて他の設定を追加（例：待機時間やタイムアウト設定など）
+
+
+# ヤフショ商品検索設定    
+yahoo_shopping:
+  store_ids:
+    - "guruguru"
+    # - "starclub"
+  output:
+    csv_filename: "yahoo_shopping_items.csv"
+
+
+
+# スクレイピング設定
+scrapers:
+  # ネッシースクレイパー設定
+  netsea:
+    output:
+      csv_filename: "netsea_scraping.csv"
+      log_dir: "logs"
+    target_pages:
+      - name: "カネイシ商品一覧"
+        url: "https://www.netsea.jp/shop/5984"
+        sort: "sales"
+        start_page: 1
+        end_page: 5
+      # - name: "ハリマ共和物産 株式会社商品一覧"
+      #   url: "https://www.netsea.jp/shop/357136"
+      #   sort: "sales"
+      #   start_page: 1
+      #   end_page: 166
+      # - name: "雑貨のFULTAC（フルタック）商品一覧"
+      #   url: "https://www.netsea.jp/shop/765972"
+      #   sort: "sales"
+      #   start_page: 1
+      #   end_page: 166
+      # - name: "オリヒロ株式会社商品一覧"
+      #   url: "https://www.netsea.jp/shop/28999"
+      #   sort: "sales"
+      #   start_page: 1
+      #   end_page: 3
+      # - name: "株式会社 白菊商品一覧"
+      #   url: "https://www.netsea.jp/shop/118571"
+      #   sort: "sales"
+      #   start_page: 1
+      #   end_page: 158
+
+
+  
+  # スーデリスクレイパー設定
+  sudeli:
+    output:
+      csv_filename: "sudeli_scraping.csv"
+      log_dir: "logs"
+    target_pages:
+      - name: "健康フーズ"
+        url: "https://www.superdelivery.com/p/do/dpsl/1000090"
+        sort: "newly" # 新着順の場合は "newly"、人気順の場合は空白 ""
+        start_page: 1
+        end_page: 50
+      - name: "東京タカラフーズ"
+        url: "https://www.superdelivery.com/p/do/dpsl/181602"
+        sort: "newly" # 新着順の場合は "newly"、人気順の場合は空白 ""
+        start_page: 1
+        end_page: 16
+
+# Keepa_seller_infoの設定
+keepa_seller:
+  output:
+    input_file: "seller_ids.csv"
+    output_file: "keepa_seller_output.csv"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        

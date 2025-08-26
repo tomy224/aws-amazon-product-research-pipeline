@@ -1,0 +1,6 @@
+requests
+pandas
+pyyaml
+python-dotenv
+pytz>=2023.3
+keepa

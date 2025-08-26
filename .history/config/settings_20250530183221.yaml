@@ -1,0 +1,212 @@
+# スクレイピング設定（101_netsea_scraper.py）
+scrapers:
+  # ネッシースクレイパー設定
+  netsea:
+    output:
+      csv_filename: "netsea_scraping.csv"
+      log_dir: "logs"
+    target_pages:
+      - name: "カネイシ商品一覧"
+        url: "https://www.netsea.jp/shop/5984"
+        sort: "sales"
+        start_page: 1
+        end_page: 2
+      # - name: "ハリマ共和物産 株式会社商品一覧"
+      #   url: "https://www.netsea.jp/shop/357136"
+      #   sort: "sales"
+      #   start_page: 1
+      #   end_page: 166
+      # - name: "雑貨のFULTAC（フルタック）商品一覧"
+      #   url: "https://www.netsea.jp/shop/765972"
+      #   sort: "sales"
+      #   start_page: 1
+      #   end_page: 166
+      # - name: "オリヒロ株式会社商品一覧"
+      #   url: "https://www.netsea.jp/shop/28999"
+      #   sort: "sales"
+      #   start_page: 1
+      #   end_page: 3
+      # - name: "株式会社 白菊商品一覧"
+      #   url: "https://www.netsea.jp/shop/118571"
+      #   sort: "sales"
+      #   start_page: 1
+      #   end_page: 158
+
+
+# スーデリスクレイパー設定（102_sudeli_scraper.py）
+  sudeli:
+    output:
+      csv_filename: "sudeli_scraping.csv"
+      log_dir: "logs"
+    target_pages:
+      - name: "健康フーズ"
+        url: "https://www.superdelivery.com/p/do/dpsl/1000090"
+        sort: "newly" # 新着順の場合は "newly"、人気順の場合は空白 ""
+        start_page: 1
+        end_page: 50
+      - name: "東京タカラフーズ"
+        url: "https://www.superdelivery.com/p/do/dpsl/181602"
+        sort: "newly" # 新着順の場合は "newly"、人気順の場合は空白 ""
+        start_page: 1
+        end_page: 16
+
+
+# ヤフショ商品検索設定（103_yahoo_breaker.py）
+yahoo_shopping:
+  store_ids:
+    - "guruguru"
+    # - "starclub"
+  output:
+    csv_filename: "yahoo_shopping_items.csv"
+
+# カタログAPIとプライシングAPIを分離したので、不要？(LambdaでカタログAPIのみの実行をするための作業)
+# # sp api設定（201_sp_product_analyzer.py）
+# sp_api:
+#   output:
+#     input_file: "keepa_seller_asin.csv" #"netsea_scraping.csv"
+#     output_file: "sp_api_output.csv"
+
+# カタログAPI用の設定
+catalog_api:
+  input_file: "keepa_seller_asin.csv"
+  output_file: "catalog_output.csv"
+
+# プライシングAPI用の設定
+pricing_api:
+  input_file: "catalog_output.csv"  # カタログAPIの出力を入力として使用
+  output_file: "pricing_output.csv"
+  filtered_output_file: "pricing_output_filtered.csv"  # フィルタリング後の出力
+
+
+# 価格検索の設定(203_yahoo_rakuten_price.py)
+price_search:
+  output:
+    input_file: "keepa_seller_asin_pricing_filtered.csv" #"jan_list.csv"        # 入力JAN一覧ファイル
+    output_file: "keepa_seller_asin_yahoo_rakuten_price_output.csv"  # 出力結果ファイル
+
+
+# Keepa api設定（206_keepa_product_analyzer.py）
+keepa_api:
+  # request_delay: 0.2  # APIリクエスト間の待機時間
+  # domain: "JP"       # 対象マーケットプレイス
+  # stats_days: 180    # 統計情報の取得日数
+  output:
+    input_file: "yahoo_rakuten_price_output.csv"
+    output_file: "keepa_seller_asin_keepa_output.csv"
+
+
+# SP-APIとrakutenyahoo apiの統合コード（902_run_data_analysis_calc.py）
+integrated_analysis:
+  input_file: keepa_seller_asin.csv
+
+
+
+# integrationコード設定（data_integrator.py）
+data_integration:
+  output:
+    sp_api_input: "keepa_seller_asin_pricing_filtered.csv" #"sp_api_output_filtered.csv" ※keepa_seller_asin が正しく最後までいくか確認するため作成。元は下にある 250530
+    keepa_input: "keepa_seller_asin_keepa_output_filtered.csv" #"keepa_output_filtered.csv"
+    output_file: "keepa_seller_asin_integrated_data.csv" #"integrated_data.csv"
+  sources:
+    - type: "yahoo_rakuten"  # ヤフショ楽天価格比較情報
+      prefix: "ヤフー楽天_"
+      files:
+        - "yahoo_rakuten_price_output.csv"
+      key_column: "ASIN"
+    # - type: "netsea"
+    #   prefix: "ネッシー_"  # 「卸_」から変更
+    #   files:
+    #     - "netsea_scraping.csv"
+    #   key_column: "JANコード"
+    # - type: "sudeli"
+    #   prefix: "スーデリ_"  # 「卸_」から変更
+    #   files:
+    #     - "sudeli_scraping.csv"
+    #   key_column: "JANコード"
+    # - type: "yahoo"  # ヤフーショッピング情報
+    #   files:
+    #     - "yahoo_shopping_items.csv"
+    #   key_column: "JAN"
+    #   prefix: "ヤフー_"
+
+
+# 計算処理の設定（data_calculator.py）
+calculator:
+  output:
+    input_file: "keepa_seller_asin_integrated_data.csv" #"integrated_data.csv"  # 入力ファイル
+    output_file: "keepa_seller_asin_calculated_data.csv" #"calculated_data.csv" # 出力ファイル
+  point_rate:
+    yahoo: 0.05  # Yahoo!ショッピングのポイント付与率（5%）
+    rakuten: 0.02  # 楽天市場のポイント付与率（2%）
+
+# フィルタリング条件（data_filtered.py）
+filter_conditions:
+  profit_min: 100        # 最小利益額（円）
+  profit_rate_min: 0     # 最小利益率（%）
+  profit_rate_max: 40    # 最大利益率（%）
+
+
+
+
+
+
+
+# # 価格検索設定
+# price_finder:
+#   yoriyasu:
+#     output:
+#       input_file: "jan_list.csv"  # JANコードリストのCSVファイル
+#       output_file: "yoriyasu_prices.csv"  # 出力ファイル
+#       log_dir: "logs"
+#     # 必要に応じて他の設定を追加（例：待機時間やタイムアウト設定など）
+
+
+
+
+
+
+
+
+
+  
+
+
+# Keepa_seller_infoの設定
+keepa_seller:
+  output:
+    input_file: "sp_api_output_filtered.csv" # "seller_ids.csv"
+    output_file: "keepa_seller_output.csv"
+
+# Keepa_seller_asinの設定
+keepa_seller_asin:
+  output:
+    input_file: "keepa_seller_output_filtered.csv"
+    output_file: "keepa_seller_asin.csv"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        

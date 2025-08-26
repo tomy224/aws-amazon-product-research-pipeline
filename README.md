@@ -171,6 +171,18 @@ aws stepfunctions create-state-machine \
   --name amazon-research-workflow --definition file://stepfunctions/workflow.json
 ```
 
+## 実行環境
+- **テスト・開発環境**: Jupyter Notebook  
+  - セル単位でコードを実行し、処理内容を確認
+- **本番・実装環境**: VSCode  
+  - Lambda用モジュールの作成、コード管理
+- **クラウド環境**: AWS  
+  - **Lambda**: データ処理関数の実行
+  - **Step Functions**: Lambda間のワークフロー制御
+ 
+- 言語: Python 3.9
+- 使用ライブラリ: requests, pandas, pyyaml, python-dotenv, pytz>=2023.3, keepa
+
 ## 📈 学習成果・技術習得
 
 ### AI駆動開発の習得

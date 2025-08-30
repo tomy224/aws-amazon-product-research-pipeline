@@ -220,3 +220,9 @@ AWS Infrastructure Engineer
 ---
 
 *このプロジェクトは、Amazon商品リサーチ業務の完全自動化を目指し、AI駆動開発によりAWSサーバーレス技術とPythonデータ処理を組み合わせて構築されています。実際のビジネス要件に基づく実用的なシステム構築経験を通じて、現代的な開発アプローチとインフラエンジニアとして必要な技術理解を実現しました。*
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+学習目的での利用や改良は自由です。お役に立てば幸いです！
